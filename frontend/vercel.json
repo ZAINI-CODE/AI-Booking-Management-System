@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && yarn install && yarn build",
-  "outputDirectory": "frontend/build",
-  "framework": null,
+  "outputDirectory": "build",
+  "buildCommand": "yarn build",
+  "installCommand": "yarn install --network-timeout 1000000",
   "functions": {
     "api/extract-booking.js": {
       "maxDuration": 30

@@ -1,0 +1,19 @@
+{
+  "summary": "Regression smoke test after Vercel config file moves. Verified file layout on disk (frontend/api/extract-booking.js, frontend/.npmrc, frontend/vercel.json exist and are valid; /app/api and /app/vercel.json removed). Backend AI extraction endpoint POST /api/extract-booking returns 200 with correct parsed booking (Ali / Al Hadi Farm / Evening / remainingPayment=13000). All 7 frontend routes (/, /ai-booking, /bookings, /receipt/:id, /settings, /calendar, /backup) load HTTP 200 with no console errors. Emergent preview app is fully functional post-refactor.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "frontend/vercel.json rewrites: the rule { source: '/api/(.*)', destination: '/api/$1' } is effectively a no-op — Vercel already routes /api/* to the functions folder automatically. The rule is harmless but redundant.",
+    "The Vercel serverless function at frontend/api/extract-booking.js is a duplicate implementation of what /app/backend/server.py POST /api/extract-booking does with emergentintegrations. On the Emergent preview these two do NOT collide (preview uses FastAPI), but be aware they diverge in provider (Vercel function uses GEMINI/OPENAI, backend uses GPT-5.2 via emergent LLM key). Keep them in sync or document the split."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "N/A - no auth in app",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Config-only iteration. All routes and backend AI extract still work end-to-end on the Emergent preview. Vercel-specific deployment cannot be validated from this environment.",
+  "rca of the issue": "N/A — no bugs found. File moves and .npmrc/vercel.json placement are correct; nothing regressed."
+}
