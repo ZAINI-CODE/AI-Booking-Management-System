@@ -1,0 +1,80 @@
+{
+  "theme": "dark",
+  "archetype": "The Technical / Premium Admin Dashboard (Vercel & Supabase inspired)",
+  "colors": {
+    "background": "#111827",
+    "surface": "#1F2937",
+    "border": "#374151",
+    "accent_primary": "#10B981",
+    "accent_hover": "#059669",
+    "text_primary": "#F9FAFB",
+    "text_secondary": "#9CA3AF",
+    "receipt": {
+      "background": "#FFFFFF",
+      "text": "#111827",
+      "heading": "#064E3B",
+      "border": "#E5E7EB"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "heading": "Outfit, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "hierarchy": {
+      "h1": "text-4xl md:text-5xl font-semibold tracking-tight",
+      "h2": "text-2xl md:text-3xl font-semibold tracking-tight",
+      "h3": "text-xl md:text-2xl font-medium",
+      "h4": "text-lg md:text-xl font-medium",
+      "body": "text-sm md:text-base leading-relaxed",
+      "small": "text-xs md:text-sm text-gray-400"
+    }
+  },
+  "layouts": {
+    "dashboard": "CSS Grid based layout (grid-cols-1 md:grid-cols-4 lg:grid-cols-12). Gap-6 for breathing room. Dashboard KPIs use col-span-1 md:col-span-2 lg:col-span-3.",
+    "sidebar": "Fixed width 256px on desktop, off-canvas drawer on mobile. Background #111827, border-r border-[#374151].",
+    "receipt": "Max-width A4 format (approx 210mm / 794px wide), centered, standard print margins. White background exclusively. Use print CSS media queries to hide sidebars and navigation.",
+    "spacing": "Generous spacing philosophy (p-6, p-8) for cards and containers to allow content to breathe."
+  },
+  "components": {
+    "cards": "rounded-xl bg-[#1F2937] border border-[#374151] shadow-sm. Hover: border-[#4B5563] -translate-y-[1px] transition-transform.",
+    "buttons": "rounded-md font-medium. Primary: bg-emerald-500 text-white hover:bg-emerald-600. Secondary: bg-[#1F2937] text-white border border-[#374151] hover:bg-[#374151].",
+    "inputs": "bg-[#111827] border-[#374151] rounded-md text-white focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500.",
+    "tables": "Shadcn based. Header bg-[#1F2937] text-gray-400. Rows border-b border-[#374151].",
+    "toasts": "Sonner with dark theme, background #1F2937, border #374151, text #F9FAFB.",
+    "ai_assistant": "Large textarea filling most of the viewport height (approx 60vh), with subtle glowing border on focus (ring-emerald-500/30) to signify AI capability.",
+    "modals_and_dropdowns": "MUST have solid background (bg-[#1F2937]) and border. NEVER use transparent backgrounds for overlays."
+  },
+  "motion": {
+    "hover": "transition-colors duration-200 ease-in-out or transition-transform duration-200 ease-in-out",
+    "page_load": "Staggered fade-in for dashboard cards (opacity 0 to 1, y: 10 to 0).",
+    "micro_interactions": "Active states scale down slightly (scale-95), inputs and buttons show ring on focus."
+  },
+  "accessibility": {
+    "contrast": "Ensure text against #1F2937 meets 4.5:1. Primary accent #10B981 against white text is ~3:1, use font-medium.",
+    "focus": "All interactive elements must have visible focus rings (e.g. focus:ring-2 focus:ring-emerald-500).",
+    "aria": "Use aria-labels for icon-only buttons (like sidebar toggle).",
+    "testing": "All interactive and key informational elements MUST include a `data-testid` attribute."
+  },
+  "instructions_to_main_agent": [
+    "Implement the 'FUN FARMHOUSE' brand text in the top left of the sidebar, styling it with 'Outfit' font, font-bold, text-xl, tracking-tight. Do not use an image logo unless requested.",
+    "Dashboard is dark mode by default. Receipt page must override dark mode and strictly use white background and dark green text/headings for PDF printing.",
+    "Use Shadcn UI components but adjust classes to match the specified hex colors (#111827 for bg, #1F2937 for cards/surfaces, #374151 for borders).",
+    "Use standard React context or state management. Write components in .js files instead of .tsx.",
+    "Add 'data-testid' to all interactive elements, e.g., 'data-testid=\"generate-booking-btn\"'.",
+    "Slot conflict engine should be logic handled in a utility function, allowing customizable double slots (Morning 10-4, Evening 5-11, Night 1-6).",
+    "For the AI Booking Assistant, design a large text area that is easily readable and has a 'Generate Booking' button that stands out.",
+    "Use Lucide-react for icons.",
+    "Ensure the layout is responsive, providing a mobile-friendly drawer sidebar and stackable cards.",
+    "Set up manifest.json for PWA installation. Currency is PKR (Rs.)."
+  ],
+  "universal_guidelines": [
+    "DO NOT use generic centered layouts. Use grid structures with optical alignment.",
+    "DO NOT use complete transparent backgrounds for dropdowns, modals or sticky headers; always use bg-[#1F2937] and border.",
+    "DO NOT apply 'transition: all', target specific properties like 'transition-colors' or 'transition-transform' to avoid breaking transform animations.",
+    "Use generous spacing: avoid cramped padding. Minimum padding for cards should be p-6.",
+    "All components must handle empty states gracefully (e.g. 'No bookings found' with a subtle icon).",
+    "Never use generic AI emojis for icons; strictly stick to lucide-react icon library."
+  ]
+}
