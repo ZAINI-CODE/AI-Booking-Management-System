@@ -3,13 +3,11 @@ import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@/index.css";
 import App from "@/App";
+import { registerServiceWorker } from "@/services/serviceWorkerRegistration";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      staleTime: 60_000,
-      refetchOnWindowFocus: false,
-    },
+    queries: { staleTime: 60_000, refetchOnWindowFocus: false },
   },
 });
 
@@ -21,3 +19,5 @@ root.render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+
+registerServiceWorker();
