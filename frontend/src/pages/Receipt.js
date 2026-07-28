@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Printer, Download, Share2, ChevronLeft, MessageCircle } from "lucide-react";
+import { Printer, Download, Share2, ChevronLeft, MessageCircle, Phone } from "lucide-react";
 import { useBookings } from "@/context/BookingContext";
 import { useSettings } from "@/context/SettingsContext";
 import { formatPKR, toNumber } from "@/utils/currency";
@@ -272,17 +272,22 @@ export default function Receipt() {
               </div>
             )}
 
-            {/* Footer contact strip */}
-            {(settings.address || settings.phone || settings.whatsapp) && (
-              <div className="mt-8 pt-4 border-t border-[#E5E7EB] flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs text-gray-500">
-                <div>
-                  {settings.address && <p>{settings.address}</p>}
-                </div>
-                <div className="text-right">
-                  {settings.phone && <span>Phone: {settings.phone}</span>}
-                  {settings.phone && settings.whatsapp && <span> · </span>}
-                  {settings.whatsapp && <span>WhatsApp: {settings.whatsapp}</span>}
-                </div>
+            {/* Footer contact strip — phone & WhatsApp only (no address) */}
+            {(settings.phone || settings.whatsapp) && (
+              <div className="mt-8 pt-4 border-t border-[#E5E7EB] flex flex-col sm:flex-row sm:items-center sm:justify-center gap-x-6 gap-y-2 text-xs text-gray-600">
+                {settings.phone && (
+                  <span className="inline-flex items-center gap-1.5" data-testid="receipt-footer-phone">
+                    <Phone className="w-3.5 h-3.5 text-[#064E3B]" />
+                    {settings.phone}
+                  </span>
+                )}
+                {settings.whatsapp && (
+                  <span className="inline-flex items-center gap-1.5" data-testid="receipt-footer-whatsapp">
+                    <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+                    WhatsApp:{" "}
+                    <span className="font-semibold text-[#064E3B]">{settings.whatsapp}</span>
+                  </span>
+                )}
               </div>
             )}
           </div>

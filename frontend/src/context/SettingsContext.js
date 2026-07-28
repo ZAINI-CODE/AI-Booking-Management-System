@@ -24,6 +24,24 @@ export function SettingsProvider({ children }) {
     saveLS(LS_KEYS.settings, settings);
   }, [settings]);
 
+  // Sync favicon + page title with uploaded logo/brand name
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const iconUrl = settings.logoDataUrl || "/favicon.svg";
+    let link = document.querySelector("link[rel='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    // If a custom logo is set, drop the type attribute so browsers detect from data URL
+    if (settings.logoDataUrl) link.removeAttribute("type");
+    else link.setAttribute("type", "image/svg+xml");
+    link.href = iconUrl;
+
+    document.title = `${settings.businessName || "FUN FARMHOUSE"} — Booking Management`;
+  }, [settings.logoDataUrl, settings.businessName]);
+
   const updateSettings = useCallback((patch) => {
     setSettings((s) => ({ ...s, ...patch }));
   }, []);
