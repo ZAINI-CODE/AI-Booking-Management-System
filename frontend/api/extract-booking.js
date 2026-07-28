@@ -48,7 +48,9 @@ function stripToJson(raw) {
 }
 
 async function callGemini(text, apiKey, systemMessage) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  // gemini-3-flash-preview is Google's current free-tier Gemini 3 Flash model
+  // (gemini-2.5-flash was deprecated for new API keys in early 2026).
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
   const r = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
