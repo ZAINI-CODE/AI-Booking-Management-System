@@ -1,12 +1,12 @@
 import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Printer, Download, Share2, ChevronLeft, MessageCircle, Phone } from "lucide-react";
+import { Printer, Download, Share2, ChevronLeft, MessageCircle, Phone, ImageDown } from "lucide-react";
 import { useBookings } from "@/context/BookingContext";
 import { useSettings } from "@/context/SettingsContext";
 import { formatPKR, toNumber } from "@/utils/currency";
 import { formatPrettyDate } from "@/utils/dateHelpers";
-import { exportElementToPDF } from "@/utils/pdfExport";
+import { exportElementToImage } from "@/utils/pdfExport";
 import { buildBookingWhatsAppUrl } from "@/utils/whatsapp";
 
 export default function Receipt() {
@@ -44,12 +44,15 @@ export default function Receipt() {
 
   const handlePrint = () => window.print();
 
-  const handlePDF = async () => {
+  const handleImage = async () => {
     try {
-      await exportElementToPDF(sheetRef.current, `FUN-FARMHOUSE-${booking.bookingId}.pdf`);
-      toast.success("PDF downloaded");
+      await exportElementToImage(
+        sheetRef.current,
+        `${(booking.farmName || "booking").replace(/\s+/g, "-")}-${booking.bookingId}.png`,
+      );
+      toast.success("Image downloaded");
     } catch (e) {
-      toast.error("PDF export failed");
+      toast.error("Image export failed");
       console.error(e);
     }
   };
@@ -96,11 +99,11 @@ export default function Receipt() {
               <Printer className="w-4 h-4" /> Print
             </button>
             <button
-              onClick={handlePDF}
-              data-testid="receipt-pdf-btn"
+              onClick={handleImage}
+              data-testid="receipt-image-btn"
               className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white text-sm transition-colors"
             >
-              <Download className="w-4 h-4" /> Download PDF
+              <ImageDown className="w-4 h-4" /> Download Image
             </button>
             <button
               onClick={handleWhatsApp}
