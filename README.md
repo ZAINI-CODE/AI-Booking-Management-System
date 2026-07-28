@@ -38,19 +38,18 @@ Endpoints:
 
 ## Deploying to Vercel
 
-```bash
-# 1. Push this repo to GitHub
-# 2. Import to Vercel
-# 3. Set environment variable in Vercel Project Settings:
-OPENAI_API_KEY=sk-...
-```
+The `frontend/` directory is the Vercel project root. It contains:
+- The React app (built with CRA)
+- `api/extract-booking.js` — Vercel Node.js serverless function for the AI extraction
+- `vercel.json` — Vercel build config
+- `.npmrc` with `legacy-peer-deps=true` — required so npm/yarn accept peer-dep warnings
 
-Vercel will pick up `vercel.json`:
-- Builds the React app from `/frontend`.
-- Serves the SPA with SPA-rewrite fallback.
-- Deploys `api/extract-booking.js` as a serverless function.
-
-You do NOT need the FastAPI backend on Vercel — the JS serverless function replaces it.
+Steps:
+1. Push this repo to GitHub.
+2. On Vercel: **Add New → Project** → import the repo.
+3. Vercel will auto-detect **Root Directory = `frontend/`** and pick up `vercel.json` from there. Do NOT change Root Directory.
+4. Add ONE of these Environment Variables (see below).
+5. Deploy.
 
 ## Environment variables (Vercel)
 
