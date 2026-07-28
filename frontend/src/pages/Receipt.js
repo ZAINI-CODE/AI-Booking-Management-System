@@ -128,77 +128,106 @@ export default function Receipt() {
           data-testid="receipt-sheet"
         >
           <div className="p-8 md:p-10">
-            {/* Header — logo (if any) + farm name (hero) + BOOKING SLIP badge */}
-            <div className="flex items-start justify-between gap-6">
-              <div className="min-w-0">
-                {settings.logoDataUrl && (
+            {/* Header — Logo (or FUN FARMHOUSE placeholder) + Ref/Issued */}
+            <div className="flex items-start justify-between gap-6 pb-5 border-b border-[#E5E7EB]">
+              <div className="flex items-center gap-4 min-w-0">
+                {settings.logoDataUrl ? (
                   <img
                     src={settings.logoDataUrl}
-                    alt="Logo"
-                    className="h-14 w-auto max-w-[220px] object-contain mb-3"
+                    alt="FUN FARMHOUSE"
+                    className="h-16 md:h-20 w-auto max-w-[220px] object-contain"
                     data-testid="receipt-logo"
                   />
+                ) : (
+                  <div className="flex items-center gap-3" data-testid="receipt-brand-fallback">
+                    <div className="w-14 h-14 rounded-full bg-[#064E3B] text-white flex items-center justify-center font-heading font-bold text-lg">
+                      FF
+                    </div>
+                    <div>
+                      <p className="font-heading font-extrabold text-xl md:text-2xl text-[#064E3B] tracking-tight leading-none">
+                        FUN FARMHOUSE
+                      </p>
+                      {settings.tagline && (
+                        <p className="text-[10px] uppercase tracking-widest text-gray-500 font-medium mt-1">
+                          {settings.tagline}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 )}
-                <h1
-                  className="font-heading text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-[#064E3B] leading-tight"
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[11px] font-mono text-gray-500">
+                  Ref: <span className="text-[#064E3B] font-semibold">{booking.bookingId}</span>
+                </p>
+                <p className="text-[11px] font-mono text-gray-500 mt-0.5">
+                  Issued: {new Date().toLocaleDateString("en-GB")}
+                </p>
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="mt-8 text-center">
+              <h1
+                className="font-heading text-2xl md:text-3xl font-bold text-[#064E3B] tracking-tight uppercase"
+                data-testid="receipt-title"
+              >
+                Booking Confirmation
+              </h1>
+              <p className="mt-3 text-sm md:text-base text-gray-600">
+                Farmhouse:{" "}
+                <span
+                  className="font-heading font-extrabold uppercase text-[#064E3B] tracking-tight"
                   data-testid="receipt-farm-name"
                 >
                   {booking.farmName || "—"}
-                </h1>
-                {settings.tagline && (
-                  <p className="mt-1 text-[11px] md:text-xs uppercase tracking-widest text-gray-500 font-medium">
-                    {settings.tagline}
-                  </p>
-                )}
-              </div>
-              <div className="shrink-0">
-                <span
-                  className="inline-block px-5 py-2.5 rounded-md bg-[#0F766E] text-white font-heading font-bold tracking-wider text-sm"
-                  data-testid="receipt-booking-slip-badge"
-                >
-                  BOOKING SLIP
                 </span>
-              </div>
+              </p>
+              {booking.eventType && (
+                <p className="mt-2 text-[11px] uppercase tracking-widest text-gray-500 font-medium">
+                  {booking.eventType}
+                </p>
+              )}
             </div>
-            <div className="mt-4 h-[3px] bg-[#0F766E] rounded-full" />
+            <div className="mt-6 border-b border-[#E5E7EB]" />
 
-            {/* GUEST DETAILS */}
+            {/* CUSTOMER DETAILS */}
             <div className="mt-7">
-              <p className="font-heading text-sm md:text-base font-bold uppercase tracking-widest text-[#0F766E]">
-                Guest Details
+              <p className="font-heading text-sm md:text-base font-bold uppercase tracking-widest text-[#064E3B]">
+                Customer Details
               </p>
               <div className="mt-1 border-b border-[#E5E7EB]" />
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-                <RowKV label="Guest Name" value={booking.customerName} />
-                <RowKV label="Contact No" value={booking.phone} />
+                <RowKV label="Customer Name" value={booking.customerName} />
+                <RowKV label="Phone Number" value={booking.phone} />
                 <RowKV label="Guests" value={booking.guests || "—"} />
                 <RowKV label="Event Type" value={booking.eventType || "—"} />
               </div>
             </div>
 
-            {/* EVENT & SCHEDULE INFORMATION */}
+            {/* BOOKING DETAILS */}
             <div className="mt-7">
-              <p className="font-heading text-sm md:text-base font-bold uppercase tracking-widest text-[#0F766E]">
-                Event &amp; Schedule Information
+              <p className="font-heading text-sm md:text-base font-bold uppercase tracking-widest text-[#064E3B]">
+                Booking Details
               </p>
               <div className="mt-1 border-b border-[#E5E7EB]" />
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                <RowKV label="Farmhouse Name" value={booking.farmName} />
                 <RowKV label="Booking Date" value={formatPrettyDate(booking.bookingDate)} />
                 <RowKV label="Time Slot" value={booking.timeSlot || "—"} />
                 <RowKV label="Slot Timing" value={booking.slotTiming || "—"} />
-                <RowKV label="Booking Ref" value={booking.bookingId} mono />
               </div>
             </div>
 
             {/* PAYMENT SUMMARY */}
             <div className="mt-7">
-              <p className="font-heading text-sm md:text-base font-bold uppercase tracking-widest text-[#0F766E]">
+              <p className="font-heading text-sm md:text-base font-bold uppercase tracking-widest text-[#064E3B]">
                 Payment Summary
               </p>
               <div className="mt-1 border-b border-[#E5E7EB]" />
               <table className="mt-4 w-full text-sm border-collapse">
                 <thead>
-                  <tr className="bg-[#0F766E] text-white">
+                  <tr className="bg-[#064E3B] text-white">
                     <th className="py-2.5 px-4 text-left font-heading font-bold tracking-wider uppercase text-xs">
                       Description
                     </th>

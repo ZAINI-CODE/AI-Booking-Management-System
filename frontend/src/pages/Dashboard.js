@@ -27,6 +27,14 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
+          {settings.logoDataUrl && (
+            <img
+              src={settings.logoDataUrl}
+              alt="FUN FARMHOUSE"
+              className="h-12 md:h-14 w-auto max-w-[220px] object-contain mb-3"
+              data-testid="dashboard-logo"
+            />
+          )}
           <p className="text-sm text-emerald-400 font-medium tracking-wider uppercase">Overview</p>
           <h1 className="mt-1 font-heading text-3xl md:text-4xl font-semibold tracking-tight text-white">
             Welcome back to <span className="text-emerald-400">FUN FARMHOUSE</span>

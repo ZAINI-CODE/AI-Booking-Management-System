@@ -26,8 +26,8 @@ export default function Settings() {
       toast.error("Please upload a PNG, JPG, SVG or WEBP image");
       return;
     }
-    if (file.size > 1024 * 1024) {
-      toast.error("Logo must be under 1 MB");
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Logo must be under 2 MB");
       return;
     }
     const reader = new FileReader();
