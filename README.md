@@ -52,13 +52,18 @@ Vercel will pick up `vercel.json`:
 
 You do NOT need the FastAPI backend on Vercel — the JS serverless function replaces it.
 
-## Environment variables
+## Environment variables (Vercel)
 
-| Variable | Where | Purpose |
-|---|---|---|
-| `REACT_APP_BACKEND_URL` | `frontend/.env` (preview only) | FastAPI base URL |
-| `EMERGENT_LLM_KEY` | `backend/.env` (preview only) | Powers GPT-5.2 via emergentintegrations |
-| `OPENAI_API_KEY` | Vercel Project Settings | Powers `api/extract-booking.js` |
+Set **ONE** of these in **Vercel → Project Settings → Environment Variables**:
+
+| Variable | Provider | Cost | Where to get it |
+|---|---|---|---|
+| `GEMINI_API_KEY` (recommended) | Google Gemini 2.5 Flash | **Free** — 1,500 requests/day | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — no credit card needed |
+| `OPENAI_API_KEY` | OpenAI GPT-5.2 | ~$0.014 / booking | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) — requires billing |
+
+The serverless function auto-detects which key is set (Gemini takes priority if both are present). You only need one.
+
+Preview / local development uses the FastAPI backend which is already configured with `EMERGENT_LLM_KEY` — no action needed.
 
 ## LocalStorage
 All application data (bookings, settings, uploaded logo) is stored client-side under:

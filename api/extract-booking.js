@@ -1,7 +1,8 @@
 // Vercel Serverless Function: /api/extract-booking
-// This runs on Vercel (Node.js runtime). It calls OpenAI directly and returns extracted JSON.
-// The frontend in this repo uses the FastAPI backend for the preview environment,
-// but this file lets you deploy the SAME app to Vercel and get the same feature.
+// Auto-detects which LLM provider to use based on environment variables:
+//   1. GEMINI_API_KEY  → Google Gemini 2.5 Flash (free tier, recommended)
+//   2. OPENAI_API_KEY  → OpenAI GPT-5.2 (paid)
+// You only need ONE of these set on Vercel.
 
 const SYSTEM_PROMPT = `You are a booking extraction assistant for FUN FARMHOUSE.
 
@@ -46,6 +47,52 @@ function stripToJson(raw) {
   return s.trim();
 }
 
+async function callGemini(text, apiKey, systemMessage) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: systemMessage }] },
+      contents: [{ role: "user", parts: [{ text }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.1,
+      },
+    }),
+  });
+  if (!r.ok) {
+    const err = await r.text();
+    throw new Error(`Gemini ${r.status}: ${err}`);
+  }
+  const data = await r.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+}
+
+async function callOpenAI(text, apiKey, systemMessage) {
+  const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-5.2",
+      messages: [
+        { role: "system", content: systemMessage },
+        { role: "user", content: text },
+      ],
+      response_format: { type: "json_object" },
+    }),
+  });
+  if (!r.ok) {
+    const err = await r.text();
+    throw new Error(`OpenAI ${r.status}: ${err}`);
+  }
+  const data = await r.json();
+  return data?.choices?.[0]?.message?.content || "";
+}
+
 export default async function handler(req, res) {
   // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -54,8 +101,14 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: "OPENAI_API_KEY not configured" });
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (!geminiKey && !openaiKey) {
+    return res.status(500).json({
+      error: "No LLM key configured",
+      detail: "Set either GEMINI_API_KEY (free) or OPENAI_API_KEY on Vercel.",
+    });
+  }
 
   let body = req.body;
   if (typeof body === "string") {
@@ -67,45 +120,34 @@ export default async function handler(req, res) {
   const today = new Date().toISOString().slice(0, 10);
   const systemMessage = SYSTEM_PROMPT + `\n\nToday's date is ${today}.`;
 
+  let raw = "";
+  let provider = "";
   try {
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-5.2",
-        messages: [
-          { role: "system", content: systemMessage },
-          { role: "user", content: text },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (!r.ok) {
-      const err = await r.text();
-      return res.status(502).json({ error: "OpenAI error", detail: err });
-    }
-    const data = await r.json();
-    const raw = data?.choices?.[0]?.message?.content || "";
-    const cleaned = stripToJson(raw);
-    if (cleaned.toLowerCase() === "null") return res.json({ booking: null, raw });
-    try {
-      const parsed = JSON.parse(cleaned);
-      return res.json({ booking: parsed, raw });
-    } catch {
-      const match = cleaned.match(/\{[\s\S]*\}/);
-      if (match) {
-        try {
-          return res.json({ booking: JSON.parse(match[0]), raw });
-        } catch {
-          /* fallthrough */
-        }
-      }
-      return res.json({ booking: null, raw, error: "Invalid JSON from LLM" });
+    if (geminiKey) {
+      provider = "gemini";
+      raw = await callGemini(text, geminiKey, systemMessage);
+    } else {
+      provider = "openai";
+      raw = await callOpenAI(text, openaiKey, systemMessage);
     }
   } catch (e) {
-    return res.status(500).json({ error: "Server error", detail: String(e) });
+    return res.status(502).json({ error: "LLM error", provider, detail: String(e) });
+  }
+
+  const cleaned = stripToJson(raw);
+  if (cleaned.toLowerCase() === "null") return res.json({ booking: null, raw, provider });
+  try {
+    const parsed = JSON.parse(cleaned);
+    return res.json({ booking: parsed, raw, provider });
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return res.json({ booking: JSON.parse(match[0]), raw, provider });
+      } catch {
+        /* fallthrough */
+      }
+    }
+    return res.json({ booking: null, raw, provider, error: "Invalid JSON from LLM" });
   }
 }
