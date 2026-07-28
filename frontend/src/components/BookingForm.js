@@ -180,7 +180,7 @@ export default function BookingForm({ existing, initialDraft, onSaved }) {
           >
             {Object.entries(SLOT_PRESETS).map(([k, v]) => (
               <option key={k} value={k}>
-                {k} ({v.label})
+                {`${k} (${v.label})`}
               </option>
             ))}
             <option value="Custom">Custom / Double Slot</option>
