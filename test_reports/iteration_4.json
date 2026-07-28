@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend regression testing for 3 prod-bug fixes (AI extraction URL fallback, favicon rounding via canvas, 8 new default farmhouses + legacy migration + persistence). All 6 target tests PASS on Emergent preview.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "tests_executed": [
+    {"name": "aiService.js fallback (code inspect)", "result": "PASS", "detail": "Line 6 uses process.env.REACT_APP_BACKEND_URL || '' — falls back to relative /api on Vercel."},
+    {"name": "POST /api/extract-booking backend regression", "result": "PASS", "detail": "curl to preview URL returned HTTP 200."},
+    {"name": "8 default farms shown on fresh /settings visit (LS cleared)", "result": "PASS", "detail": "All 8 expected chips present: Sheikh, Al-Hadi, Butt, Akram, Buddy Dean's, Harbor, Zaman, SK."},
+    {"name": "Added farm persists across F5 reload", "result": "PASS", "detail": "TEST_Persist Farm chip still present after reload."},
+    {"name": "Legacy-farm auto-upgrade migration", "result": "PASS", "detail": "Seeded LS with ['Al Hadi Farm','Green Farm','Palm Grove Farm'] → after reload chips show the new 8-farm list; legacy names gone."},
+    {"name": "Favicon fallback when no logo", "result": "PASS", "detail": "link[rel=icon].href === '/favicon.svg'."},
+    {"name": "Favicon rounded PNG when logo uploaded", "result": "PASS", "detail": "After setting logoDataUrl (2x2 red PNG) + reload + 1200ms, link[rel=icon].href starts with 'data:image/png;base64,' — proves circular canvas ran."},
+    {"name": "/ai-booking end-to-end", "result": "PASS", "detail": "Textarea + Generate Booking → preview rendered with Customer=John, Farmhouse=Sheikh Farmhouse, Date=2026-01-15, Guests=4, Phone=03001234567. No 'AI extraction failed' toast. Confirm/Save button present."}
+  ],
+  "test_report_links": ["/app/test_reports/iteration_4.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "SettingsContext favicon effect gracefully falls back to /favicon.svg on canvas.toDataURL failure (tainted canvas etc.) — good.",
+    "Legacy migration is length+order strict; users who manually re-sorted the three legacy farms would not migrate. Acceptable trade-off to avoid clobbering customised lists.",
+    "aiService.js: relative URL fallback confirmed present and correct for Vercel same-origin serverless function."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Ephemeral LocalStorage seeding done via page.evaluate (cleared between tests). No backend data created.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 3 prod bug fixes verified on Emergent preview. Backend /api/extract-booking still returns 200. If retesting on Vercel deployment, verify same-origin /api/extract-booking serverless function works and favicon rounds after real file upload via the file input."
+}
