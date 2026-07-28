@@ -1,6 +1,7 @@
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import AppLayout from "@/layouts/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import Bookings from "@/pages/Bookings";
@@ -48,6 +49,7 @@ function App() {
           },
         }}
       />
+      <SpeedInsights />
     </div>
   );
 }
