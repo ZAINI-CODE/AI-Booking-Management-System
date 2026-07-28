@@ -3,6 +3,8 @@ function normalizePK(phone) {
   if (!d) return "";
   if (d.startsWith("92")) return d;
   if (d.startsWith("0")) return "92" + d.slice(1);
+  // Bare 10-digit local (e.g. 3001234567) → prepend PK country code
+  if (d.length === 10) return "92" + d;
   return d;
 }
 

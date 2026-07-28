@@ -24,16 +24,20 @@ Build a production-ready AI-powered farmhouse reservation management system with
 
 ## Implemented (2026-02-27)
 - Backend: `/api/health`, `/api/extract-booking` (GPT-5.2, robust JSON parsing).
-- Frontend routes: `/` (Dashboard), `/ai-booking`, `/bookings`, `/bookings/new`, `/bookings/:id/edit`, `/receipt/:id`, `/settings`, `/backup`.
-- BookingContext (CRUD + stats + conflict integration) & SettingsContext (business info, farms, logo).
-- Utils: slotEngine (`findConflict`, `bookingInterval` w/ overnight-wrap handling), currency (PKR formatter), dateHelpers, backup (export/import JSON), pdfExport (html2pdf).
-- Components: Sidebar (with logo/brand fallback), AppLayout (mobile drawer), StatCard, BookingCard, BookingForm, EmptyState.
-- Pages: Dashboard (5 KPI cards + quick actions + today/upcoming/recent), AIBooking (large textarea, GPT-5.2 extractor, review preview, quick confirm or edit-first), Bookings (search + filters), BookingEdit, Receipt (hotel-style, white/dark-green, one page, A4-safe, print/PDF/share), Settings (logo upload, business info, farmhouse chips CRUD), Backup (export/import/clear).
+- Frontend routes: `/` (Dashboard), `/ai-booking`, `/calendar`, `/bookings`, `/bookings/new`, `/bookings/:id/edit`, `/receipt/:id`, `/settings`, `/backup`.
+- BookingContext (CRUD + stats + conflict integration) & SettingsContext (business info, farms, logo, tagline).
+- Utils: slotEngine (`findConflict`, `bookingInterval` w/ overnight-wrap, `toAmPm`, `to24`), currency (PKR formatter), dateHelpers, backup (export/import JSON), pdfExport (html2pdf), whatsapp (`buildBookingWhatsAppUrl` — pk-normalized phone).
+- Components: Sidebar (with logo/brand fallback, Calendar nav item), AppLayout (mobile drawer), StatCard, BookingCard, BookingForm (adjust-time checkbox + type=time pickers), EmptyState.
+- Pages: Dashboard (5 KPI cards + quick actions), AIBooking (GPT-5.2 extractor + preview), Calendar (month grid, color-coded farm chips, day panel), Bookings (search + filters), BookingEdit, Receipt (hotel-style, farm name hero, no FUN FARMHOUSE brand text, tagline, BOOKING SLIP pill, red remaining, yellow note, WhatsApp/Print/PDF/Share), Settings (logo, tagline, business info, farmhouses), Backup.
 - PWA: `manifest.json`, `service-worker.js`, registration in prod builds.
-- Vercel: `api/extract-booking.js` serverless function + `vercel.json`.
-- README with full deployment instructions.
-- All interactive elements have `data-testid` attributes.
-- Testing subagent: 5/5 backend tests + all critical E2E flows pass.
+- Vercel: `api/extract-booking.js` + `vercel.json`.
+
+## Iteration 2 (2026-02-27)
+- Added Calendar page (month view + day panel).
+- Added WhatsApp Confirm button on receipt.
+- Redesigned receipt to match user's reference (farm name hero, no FUN FARMHOUSE brand text, BOOKING SLIP pill, limited-field layout, red remaining balance, yellow note).
+- Added adjust-time-manually flow on preset slots + type=time pickers.
+- Added `tagline` setting for receipt subtitle.
 
 ## Backlog (not-yet-built, P-ranked)
 - **P1** Real-time slot picker (time grid) instead of text inputs for custom slots.

@@ -263,24 +263,6 @@ export default function Receipt() {
   );
 }
 
-function Section({ title, children }) {
-  return (
-    <div>
-      <p className="text-xs uppercase tracking-widest text-[#059669] font-medium">{title}</p>
-      <div className="mt-3 space-y-2">{children}</div>
-    </div>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 text-sm">
-      <span className="text-gray-500">{label}</span>
-      <span className="text-[#111827] font-medium text-right break-words">{value || "—"}</span>
-    </div>
-  );
-}
-
 function RowKV({ label, value, mono = false }) {
   return (
     <div className="flex items-baseline gap-3">

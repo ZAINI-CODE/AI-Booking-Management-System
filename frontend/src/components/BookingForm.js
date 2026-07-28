@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Save, Trash2, FileText } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 import { useBookings } from "@/context/BookingContext";
-import { SLOT_PRESETS, slotTimingFor, toAmPm, to24 } from "@/utils/slotEngine";
+import { SLOT_PRESETS, toAmPm, to24 } from "@/utils/slotEngine";
 import { toNumber } from "@/utils/currency";
 import { todayISO } from "@/utils/dateHelpers";
 
