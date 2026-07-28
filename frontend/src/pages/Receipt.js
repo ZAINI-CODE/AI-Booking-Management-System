@@ -1,12 +1,13 @@
 import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Printer, Download, Share2, ChevronLeft } from "lucide-react";
+import { Printer, Download, Share2, ChevronLeft, MessageCircle } from "lucide-react";
 import { useBookings } from "@/context/BookingContext";
 import { useSettings } from "@/context/SettingsContext";
 import { formatPKR, toNumber } from "@/utils/currency";
 import { formatPrettyDate } from "@/utils/dateHelpers";
 import { exportElementToPDF } from "@/utils/pdfExport";
+import { buildBookingWhatsAppUrl } from "@/utils/whatsapp";
 
 export default function Receipt() {
   const { id } = useParams();
@@ -54,10 +55,10 @@ export default function Receipt() {
   };
 
   const handleShare = async () => {
-    const shareText = `FUN FARMHOUSE Booking\n${booking.customerName} · ${booking.farmName}\n${formatPrettyDate(booking.bookingDate)} · ${booking.slotTiming || booking.timeSlot}\nTotal: ${formatPKR(totals.total)} · Advance: ${formatPKR(totals.advance)} · Remaining: ${formatPKR(totals.remaining)}\nRef: ${booking.bookingId}`;
+    const shareText = `${booking.farmName} Booking\n${booking.customerName} · ${formatPrettyDate(booking.bookingDate)} · ${booking.slotTiming || booking.timeSlot}\nTotal: ${formatPKR(totals.total)} · Advance: ${formatPKR(totals.advance)} · Remaining: ${formatPKR(totals.remaining)}\nRef: ${booking.bookingId}`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: "FUN FARMHOUSE Booking", text: shareText });
+        await navigator.share({ title: `${booking.farmName} Booking`, text: shareText });
       } catch { /* cancelled */ }
     } else {
       try {
@@ -67,6 +68,11 @@ export default function Receipt() {
         toast.error("Share not supported");
       }
     }
+  };
+
+  const handleWhatsApp = () => {
+    const url = buildBookingWhatsAppUrl(booking, settings);
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -97,6 +103,13 @@ export default function Receipt() {
               <Download className="w-4 h-4" /> Download PDF
             </button>
             <button
+              onClick={handleWhatsApp}
+              data-testid="receipt-whatsapp-btn"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#25D366] hover:bg-[#1ebe5b] text-white text-sm font-medium transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" /> WhatsApp
+            </button>
+            <button
               onClick={handleShare}
               data-testid="receipt-share-btn"
               className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#1F2937] hover:bg-[#374151] text-white text-sm border border-[#374151] transition-colors"
@@ -115,98 +128,134 @@ export default function Receipt() {
           data-testid="receipt-sheet"
         >
           <div className="p-8 md:p-10">
-            {/* Header */}
-            <div className="flex items-start justify-between gap-6 pb-6 border-b-2 border-[#064E3B]">
-              <div className="flex items-center gap-4">
-                {settings.logoDataUrl ? (
-                  <img src={settings.logoDataUrl} alt="FUN FARMHOUSE" className="h-14 w-auto max-w-[200px] object-contain" data-testid="receipt-logo" />
-                ) : (
-                  <div>
-                    <p className="font-heading font-extrabold text-3xl tracking-tight text-[#064E3B]" data-testid="receipt-brand-fallback">
-                      FUN FARMHOUSE
-                    </p>
-                    <p className="text-[11px] uppercase tracking-widest text-[#059669] mt-0.5">Premium Farmhouse Stays</p>
-                  </div>
+            {/* Header — logo (if any) + farm name (hero) + BOOKING SLIP badge */}
+            <div className="flex items-start justify-between gap-6">
+              <div className="min-w-0">
+                {settings.logoDataUrl && (
+                  <img
+                    src={settings.logoDataUrl}
+                    alt="Logo"
+                    className="h-14 w-auto max-w-[220px] object-contain mb-3"
+                    data-testid="receipt-logo"
+                  />
+                )}
+                <h1
+                  className="font-heading text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-[#064E3B] leading-tight"
+                  data-testid="receipt-farm-name"
+                >
+                  {booking.farmName || "—"}
+                </h1>
+                {settings.tagline && (
+                  <p className="mt-1 text-[11px] md:text-xs uppercase tracking-widest text-gray-500 font-medium">
+                    {settings.tagline}
+                  </p>
                 )}
               </div>
-              <div className="text-right">
-                <p className="font-heading text-xl md:text-2xl font-semibold text-[#064E3B]">Booking Confirmation</p>
-                <p className="text-[11px] text-gray-500 mt-1 font-mono">Ref: {booking.bookingId}</p>
-                <p className="text-[11px] text-gray-500">Issued: {new Date().toLocaleDateString("en-GB")}</p>
+              <div className="shrink-0">
+                <span
+                  className="inline-block px-5 py-2.5 rounded-md bg-[#0F766E] text-white font-heading font-bold tracking-wider text-sm"
+                  data-testid="receipt-booking-slip-badge"
+                >
+                  BOOKING SLIP
+                </span>
+              </div>
+            </div>
+            <div className="mt-4 h-[3px] bg-[#0F766E] rounded-full" />
+
+            {/* GUEST DETAILS */}
+            <div className="mt-7">
+              <p className="font-heading text-sm md:text-base font-bold uppercase tracking-widest text-[#0F766E]">
+                Guest Details
+              </p>
+              <div className="mt-1 border-b border-[#E5E7EB]" />
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                <RowKV label="Guest Name" value={booking.customerName} />
+                <RowKV label="Contact No" value={booking.phone} />
+                <RowKV label="Guests" value={booking.guests || "—"} />
+                <RowKV label="Event Type" value={booking.eventType || "—"} />
               </div>
             </div>
 
-            {/* Farm name banner */}
-            <div className="mt-6 flex items-baseline justify-between">
-              <p className="text-xs uppercase tracking-widest text-[#059669] font-medium">Reserved Farmhouse</p>
-              <p className="text-xs text-gray-500">{booking.eventType || "Event"}</p>
-            </div>
-            <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#064E3B] mt-1 uppercase tracking-tight">
-              {booking.farmName || "—"}
-            </h2>
-
-            {/* Sections */}
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Section title="Guest Details">
-                <Row label="Name" value={booking.customerName} />
-                <Row label="Phone" value={booking.phone} />
-                <Row label="Guests" value={booking.guests || "—"} />
-                <Row label="Event" value={booking.eventType || "—"} />
-              </Section>
-
-              <Section title="Reservation">
-                <Row label="Date" value={formatPrettyDate(booking.bookingDate)} />
-                <Row label="Slot" value={booking.timeSlot || "—"} />
-                <Row label="Timing" value={booking.slotTiming || "—"} />
-                <Row label="Type" value={booking.isDoubleSlot ? "Custom / Double slot" : "Standard slot"} />
-              </Section>
+            {/* EVENT & SCHEDULE INFORMATION */}
+            <div className="mt-7">
+              <p className="font-heading text-sm md:text-base font-bold uppercase tracking-widest text-[#0F766E]">
+                Event &amp; Schedule Information
+              </p>
+              <div className="mt-1 border-b border-[#E5E7EB]" />
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                <RowKV label="Booking Date" value={formatPrettyDate(booking.bookingDate)} />
+                <RowKV label="Time Slot" value={booking.timeSlot || "—"} />
+                <RowKV label="Slot Timing" value={booking.slotTiming || "—"} />
+                <RowKV label="Booking Ref" value={booking.bookingId} mono />
+              </div>
             </div>
 
-            {/* Payment table */}
-            <div className="mt-8">
-              <p className="text-xs uppercase tracking-widest text-[#059669] font-medium">Payment Summary</p>
-              <table className="mt-3 w-full text-sm">
+            {/* PAYMENT SUMMARY */}
+            <div className="mt-7">
+              <p className="font-heading text-sm md:text-base font-bold uppercase tracking-widest text-[#0F766E]">
+                Payment Summary
+              </p>
+              <div className="mt-1 border-b border-[#E5E7EB]" />
+              <table className="mt-4 w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-[#0F766E] text-white">
+                    <th className="py-2.5 px-4 text-left font-heading font-bold tracking-wider uppercase text-xs">
+                      Description
+                    </th>
+                    <th className="py-2.5 px-4 text-right font-heading font-bold tracking-wider uppercase text-xs">
+                      Amount (PKR)
+                    </th>
+                  </tr>
+                </thead>
                 <tbody>
                   <tr className="border-b border-[#E5E7EB]">
-                    <td className="py-3 text-gray-700">Total Booking Amount</td>
-                    <td className="py-3 text-right font-medium text-[#111827]">{formatPKR(totals.total)}</td>
+                    <td className="py-3 px-4 text-gray-700">Total Booking Amount</td>
+                    <td className="py-3 px-4 text-right font-semibold text-[#111827]">
+                      {totals.total.toLocaleString("en-PK")}
+                    </td>
                   </tr>
                   <tr className="border-b border-[#E5E7EB]">
-                    <td className="py-3 text-gray-700">Advance Payment Received</td>
-                    <td className="py-3 text-right font-medium text-[#111827]">{formatPKR(totals.advance)}</td>
+                    <td className="py-3 px-4 text-gray-700">Advance Payment Received</td>
+                    <td className="py-3 px-4 text-right font-semibold text-[#111827]">
+                      {totals.advance.toLocaleString("en-PK")}
+                    </td>
                   </tr>
-                  <tr className="bg-[#ECFDF5]">
-                    <td className="py-3 px-3 text-[#064E3B] font-semibold rounded-l-md">Remaining Balance Payable</td>
-                    <td className="py-3 px-3 text-right font-heading text-lg font-bold text-[#064E3B] rounded-r-md" data-testid="receipt-remaining">
-                      {formatPKR(totals.remaining)}
+                  <tr className="bg-[#FEF2F2]">
+                    <td className="py-3 px-4 font-heading font-bold uppercase text-[#B91C1C] text-sm">
+                      Remaining Balance Payable (At Check-in)
+                    </td>
+                    <td
+                      className="py-3 px-4 text-right font-heading font-extrabold text-lg text-[#B91C1C]"
+                      data-testid="receipt-remaining"
+                    >
+                      {totals.remaining.toLocaleString("en-PK")}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            {/* Notes */}
+            {/* Note */}
             {(booking.notes || settings.defaultNote) && (
-              <div className="mt-8">
-                <p className="text-xs uppercase tracking-widest text-[#059669] font-medium">Notes</p>
-                <p className="mt-2 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {booking.notes || settings.defaultNote}
-                </p>
+              <div className="mt-7 rounded-md bg-[#FEF9C3] border border-[#FDE68A] px-4 py-3 text-sm text-[#713F12]">
+                <span className="font-heading font-bold">Note: </span>
+                <span className="whitespace-pre-wrap">{booking.notes || settings.defaultNote}</span>
               </div>
             )}
 
-            {/* Footer */}
-            <div className="mt-10 pt-5 border-t border-[#E5E7EB] flex flex-col md:flex-row md:items-end md:justify-between gap-3 text-xs text-gray-500">
-              <div>
-                {settings.address && <p>{settings.address}</p>}
-                <p className="mt-1">
+            {/* Footer contact strip */}
+            {(settings.address || settings.phone || settings.whatsapp) && (
+              <div className="mt-8 pt-4 border-t border-[#E5E7EB] flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs text-gray-500">
+                <div>
+                  {settings.address && <p>{settings.address}</p>}
+                </div>
+                <div className="text-right">
                   {settings.phone && <span>Phone: {settings.phone}</span>}
                   {settings.phone && settings.whatsapp && <span> · </span>}
                   {settings.whatsapp && <span>WhatsApp: {settings.whatsapp}</span>}
-                </p>
+                </div>
               </div>
-              <p className="font-heading text-[#064E3B] font-semibold">Thank you — see you soon at FUN FARMHOUSE</p>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -228,6 +277,19 @@ function Row({ label, value }) {
     <div className="flex items-baseline justify-between gap-4 text-sm">
       <span className="text-gray-500">{label}</span>
       <span className="text-[#111827] font-medium text-right break-words">{value || "—"}</span>
+    </div>
+  );
+}
+
+function RowKV({ label, value, mono = false }) {
+  return (
+    <div className="flex items-baseline gap-3">
+      <span className="text-[13px] font-heading font-bold text-[#111827] shrink-0 min-w-[110px]">
+        {label}:
+      </span>
+      <span className={`text-[13px] text-gray-700 break-words ${mono ? "font-mono" : ""}`}>
+        {value || "—"}
+      </span>
     </div>
   );
 }

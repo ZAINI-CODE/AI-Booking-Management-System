@@ -6,6 +6,7 @@ import Dashboard from "@/pages/Dashboard";
 import Bookings from "@/pages/Bookings";
 import BookingEdit from "@/pages/BookingEdit";
 import AIBooking from "@/pages/AIBooking";
+import CalendarPage from "@/pages/Calendar";
 import Receipt from "@/pages/Receipt";
 import Settings from "@/pages/Settings";
 import Backup from "@/pages/Backup";
@@ -25,6 +26,7 @@ function App() {
                 <Route path="/bookings/new" element={<BookingEdit />} />
                 <Route path="/bookings/:id/edit" element={<BookingEdit />} />
                 <Route path="/ai-booking" element={<AIBooking />} />
+                <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/backup" element={<Backup />} />
               </Route>

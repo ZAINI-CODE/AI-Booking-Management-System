@@ -8,6 +8,41 @@ export const SLOT_PRESETS = {
 };
 
 /**
+ * Convert "HH:MM" 24-hour input value into "H:MM AM/PM" (12-hour) display.
+ * If already in AM/PM form, returns it upper-cased.
+ */
+export function toAmPm(t) {
+  if (!t) return "";
+  const s = String(t).trim().toUpperCase();
+  if (/AM|PM/.test(s)) return s;
+  const m = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return s;
+  const h = parseInt(m[1], 10);
+  const min = m[2];
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${min} ${period}`;
+}
+
+/**
+ * Convert an AM/PM string OR 24-hour string to "HH:MM" 24-hour for <input type="time">.
+ */
+export function to24(t) {
+  if (!t) return "";
+  const s = String(t).trim().toUpperCase();
+  const m = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+  if (m) {
+    let h = parseInt(m[1], 10);
+    if (m[3] === "AM") h = h === 12 ? 0 : h;
+    else h = h === 12 ? 12 : h + 12;
+    return `${String(h).padStart(2, "0")}:${m[2]}`;
+  }
+  const m24 = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (m24) return `${String(parseInt(m24[1], 10)).padStart(2, "0")}:${m24[2]}`;
+  return "";
+}
+
+/**
  * Convert "HH:MM" 24-hour or "H:MM AM/PM" 12-hour into minutes-since-midnight.
  * Returns null if unparseable.
  */
@@ -98,7 +133,9 @@ export function findConflict(candidate, existing) {
 
 export function slotTimingFor(timeSlot, customStartTime, customEndTime) {
   if (timeSlot === "Custom") {
-    if (customStartTime && customEndTime) return `${customStartTime} - ${customEndTime}`;
+    const s = toAmPm(customStartTime);
+    const e = toAmPm(customEndTime);
+    if (s && e) return `${s} - ${e}`;
     return "";
   }
   return SLOT_PRESETS[timeSlot]?.label || "";

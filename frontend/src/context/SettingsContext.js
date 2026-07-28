@@ -4,10 +4,11 @@ import { LS_KEYS, loadLS, saveLS } from "@/utils/localStorage";
 const DEFAULT_SETTINGS = {
   businessName: "FUN FARMHOUSE",
   logoDataUrl: "",
+  tagline: "Premium Farmhouse Reservations",
   phone: "",
   whatsapp: "",
   address: "",
-  defaultNote: "Thank you for choosing FUN FARMHOUSE. Please arrive 15 minutes before your slot.",
+  defaultNote: "Remaining balance must be cleared at the time of check-in. Management is not responsible for personal belongings.",
   farms: ["Al Hadi Farm", "Green Farm", "Palm Grove Farm"],
 };
 

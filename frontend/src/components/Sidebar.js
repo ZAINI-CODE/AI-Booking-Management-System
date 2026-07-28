@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Sparkles, CalendarDays, Settings as SettingsIcon, DatabaseBackup, PlusCircle } from "lucide-react";
+import { LayoutDashboard, Sparkles, CalendarDays, CalendarRange, Settings as SettingsIcon, DatabaseBackup, PlusCircle } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 
 const items = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, testId: "nav-dashboard" },
   { to: "/ai-booking", label: "AI Booking", icon: Sparkles, testId: "nav-ai-booking" },
+  { to: "/calendar", label: "Calendar", icon: CalendarRange, testId: "nav-calendar" },
   { to: "/bookings", label: "Bookings", icon: CalendarDays, testId: "nav-bookings" },
   { to: "/settings", label: "Settings", icon: SettingsIcon, testId: "nav-settings" },
   { to: "/backup", label: "Backup", icon: DatabaseBackup, testId: "nav-backup" },

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Save, Trash2, FileText } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 import { useBookings } from "@/context/BookingContext";
-import { SLOT_PRESETS, slotTimingFor } from "@/utils/slotEngine";
+import { SLOT_PRESETS, slotTimingFor, toAmPm, to24 } from "@/utils/slotEngine";
 import { toNumber } from "@/utils/currency";
 import { todayISO } from "@/utils/dateHelpers";
 
@@ -20,8 +20,8 @@ function initFromDraft(draft) {
     timeSlot: draft?.timeSlot || "Morning",
     slotTiming: draft?.slotTiming || "",
     isDoubleSlot: !!draft?.isDoubleSlot,
-    customStartTime: draft?.customStartTime || "",
-    customEndTime: draft?.customEndTime || "",
+    customStartTime: to24(draft?.customStartTime || ""),
+    customEndTime: to24(draft?.customEndTime || ""),
     guests: draft?.guests || "",
     eventType: draft?.eventType || "Birthday",
     totalAmount: draft?.totalAmount || "",
@@ -38,24 +38,61 @@ export default function BookingForm({ existing, initialDraft, onSaved }) {
 
   const [form, setForm] = useState(() => initFromDraft(existing || initialDraft));
   const [saving, setSaving] = useState(false);
+  const seed = existing || initialDraft;
+  const [adjustTime, setAdjustTime] = useState(
+    !!(seed && seed.isDoubleSlot && seed.timeSlot && seed.timeSlot !== "Custom"),
+  );
 
-  // Sync slot timing when slot changes
+  // Recompute slotTiming + isDoubleSlot whenever inputs that drive them change
   useEffect(() => {
-    if (form.timeSlot !== "Custom") {
-      const timing = slotTimingFor(form.timeSlot);
-      setForm((f) => ({ ...f, slotTiming: timing, isDoubleSlot: false, customStartTime: "", customEndTime: "" }));
-    } else {
-      const timing = slotTimingFor("Custom", form.customStartTime, form.customEndTime);
-      setForm((f) => ({ ...f, slotTiming: timing, isDoubleSlot: true }));
-    }
-  }, [form.timeSlot]);
+    setForm((prev) => {
+      let timing = "";
+      let isDouble = false;
+      if (prev.timeSlot === "Custom") {
+        timing =
+          prev.customStartTime && prev.customEndTime
+            ? `${toAmPm(prev.customStartTime)} - ${toAmPm(prev.customEndTime)}`
+            : "";
+        isDouble = true;
+      } else if (adjustTime) {
+        timing =
+          prev.customStartTime && prev.customEndTime
+            ? `${toAmPm(prev.customStartTime)} - ${toAmPm(prev.customEndTime)}`
+            : "";
+        isDouble = true;
+      } else {
+        timing = SLOT_PRESETS[prev.timeSlot]?.label || "";
+        isDouble = false;
+      }
+      if (prev.slotTiming === timing && prev.isDoubleSlot === isDouble) return prev;
+      return { ...prev, slotTiming: timing, isDoubleSlot: isDouble };
+    });
+  }, [form.timeSlot, form.customStartTime, form.customEndTime, adjustTime]);
 
-  useEffect(() => {
-    if (form.timeSlot === "Custom") {
-      const timing = slotTimingFor("Custom", form.customStartTime, form.customEndTime);
-      setForm((f) => ({ ...f, slotTiming: timing }));
+  const handleToggleAdjust = (checked) => {
+    setAdjustTime(checked);
+    if (checked && form.timeSlot !== "Custom") {
+      const p = SLOT_PRESETS[form.timeSlot];
+      if (p) setForm((f) => ({ ...f, customStartTime: p.start, customEndTime: p.end }));
+    } else if (!checked && form.timeSlot !== "Custom") {
+      setForm((f) => ({ ...f, customStartTime: "", customEndTime: "" }));
     }
-  }, [form.customStartTime, form.customEndTime]);
+  };
+
+  const handleSlotChange = (v) => {
+    setForm((f) => {
+      const next = { ...f, timeSlot: v };
+      if (v === "Custom") return next;
+      // Switching to a preset — if adjust is on, seed with preset defaults; else clear
+      if (adjustTime) {
+        const p = SLOT_PRESETS[v];
+        if (p) return { ...next, customStartTime: p.start, customEndTime: p.end };
+      } else {
+        return { ...next, customStartTime: "", customEndTime: "" };
+      }
+      return next;
+    });
+  };
 
   const remaining = useMemo(() => {
     const t = toNumber(form.totalAmount);
@@ -175,7 +212,7 @@ export default function BookingForm({ existing, initialDraft, onSaved }) {
           <select
             className={inputCls}
             value={form.timeSlot}
-            onChange={(e) => set("timeSlot", e.target.value)}
+            onChange={(e) => handleSlotChange(e.target.value)}
             data-testid="select-time-slot"
           >
             {Object.entries(SLOT_PRESETS).map(([k, v]) => (
@@ -191,27 +228,52 @@ export default function BookingForm({ existing, initialDraft, onSaved }) {
           <input className={`${inputCls} opacity-70 cursor-not-allowed`} value={form.slotTiming} readOnly data-testid="input-slot-timing" />
         </div>
 
-        {form.timeSlot === "Custom" && (
+        {form.timeSlot !== "Custom" && (
+          <div className="md:col-span-2 flex items-center gap-3 px-4 py-3 rounded-md bg-[#111827] border border-[#374151]">
+            <input
+              type="checkbox"
+              id="adjust-time-checkbox"
+              checked={adjustTime}
+              onChange={(e) => handleToggleAdjust(e.target.checked)}
+              data-testid="adjust-time-checkbox"
+              className="w-4 h-4 accent-emerald-500 cursor-pointer"
+            />
+            <label htmlFor="adjust-time-checkbox" className="text-sm text-gray-300 cursor-pointer flex-1">
+              Adjust <span className="text-emerald-400 font-medium">{form.timeSlot}</span> slot time manually
+              <span className="block text-xs text-gray-500 mt-0.5">
+                Turn on if the customer wants a shorter or shifted window (e.g. only 4 hours instead of the full 6).
+              </span>
+            </label>
+          </div>
+        )}
+
+        {(form.timeSlot === "Custom" || adjustTime) && (
           <>
             <div>
-              <label className={labelCls}>Custom Start (e.g. 10:00 AM)</label>
+              <label className={labelCls}>Start Time</label>
               <input
+                type="time"
                 className={inputCls}
                 value={form.customStartTime}
                 onChange={(e) => set("customStartTime", e.target.value)}
-                placeholder="10:00 AM"
                 data-testid="input-custom-start"
               />
+              {form.customStartTime && (
+                <p className="mt-1 text-[11px] text-gray-500 font-mono">{toAmPm(form.customStartTime)}</p>
+              )}
             </div>
             <div>
-              <label className={labelCls}>Custom End (e.g. 12:00 PM)</label>
+              <label className={labelCls}>End Time</label>
               <input
+                type="time"
                 className={inputCls}
                 value={form.customEndTime}
                 onChange={(e) => set("customEndTime", e.target.value)}
-                placeholder="12:00 PM"
                 data-testid="input-custom-end"
               />
+              {form.customEndTime && (
+                <p className="mt-1 text-[11px] text-gray-500 font-mono">{toAmPm(form.customEndTime)}</p>
+              )}
             </div>
           </>
         )}

@@ -9,6 +9,7 @@ export default function Settings() {
     phone: settings.phone || "",
     whatsapp: settings.whatsapp || "",
     address: settings.address || "",
+    tagline: settings.tagline || "",
     defaultNote: settings.defaultNote || "",
   });
   const [newFarm, setNewFarm] = useState("");
@@ -107,6 +108,11 @@ export default function Settings() {
           <div className="md:col-span-2">
             <label className={labelCls}>Address</label>
             <input className={inputCls} value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} data-testid="settings-address" placeholder="Main GT Road, Lahore" />
+          </div>
+          <div className="md:col-span-2">
+            <label className={labelCls}>Receipt Tagline</label>
+            <input className={inputCls} value={form.tagline} onChange={(e) => setForm((f) => ({ ...f, tagline: e.target.value }))} data-testid="settings-tagline" placeholder="Luxury Event Venue &amp; Swimming Pool" />
+            <p className="mt-1 text-[11px] text-gray-500">Shown as a small line under your farmhouse name on the receipt.</p>
           </div>
           <div className="md:col-span-2">
             <label className={labelCls}>Default Receipt Note</label>
