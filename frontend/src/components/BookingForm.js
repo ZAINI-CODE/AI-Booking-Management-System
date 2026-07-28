@@ -23,7 +23,7 @@ function initFromDraft(draft) {
     customStartTime: to24(draft?.customStartTime || ""),
     customEndTime: to24(draft?.customEndTime || ""),
     guests: draft?.guests || "",
-    eventType: draft?.eventType || "Birthday",
+    eventType: draft?.eventType || "Pool Party",
     totalAmount: draft?.totalAmount || "",
     advancePaid: draft?.advancePaid || "",
     remainingPayment: draft?.remainingPayment || "",
