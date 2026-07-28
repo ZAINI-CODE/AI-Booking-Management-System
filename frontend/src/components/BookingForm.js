@@ -8,7 +8,20 @@ import { SLOT_PRESETS, toAmPm, to24 } from "@/utils/slotEngine";
 import { toNumber } from "@/utils/currency";
 import { todayISO } from "@/utils/dateHelpers";
 
-const EVENT_TYPES = ["Birthday", "Wedding", "Corporate", "Family Gathering", "Anniversary", "Other"];
+const EVENT_TYPES = [
+  "Pool Party",
+  "Birthday",
+  "Wedding",
+  "Engagement",
+  "Anniversary",
+  "Corporate Event",
+  "Family Gathering",
+  "Reunion",
+  "Photoshoot",
+  "Music Night",
+  "BBQ Night",
+  "Other",
+];
 
 function initFromDraft(draft) {
   return {
@@ -23,7 +36,7 @@ function initFromDraft(draft) {
     customStartTime: to24(draft?.customStartTime || ""),
     customEndTime: to24(draft?.customEndTime || ""),
     guests: draft?.guests || "",
-    eventType: draft?.eventType || "Birthday",
+    eventType: draft?.eventType || "Pool Party",
     totalAmount: draft?.totalAmount || "",
     advancePaid: draft?.advancePaid || "",
     remainingPayment: draft?.remainingPayment || "",
