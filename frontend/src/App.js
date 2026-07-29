@@ -10,6 +10,7 @@ import CalendarPage from "@/pages/Calendar";
 import Receipt from "@/pages/Receipt";
 import Settings from "@/pages/Settings";
 import Backup from "@/pages/Backup";
+import { Analytics } from '@vercel/analytics/next';
 import { BookingProvider } from "@/context/BookingContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 
@@ -35,6 +36,7 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
+                <Analytics />
         </BookingProvider>
       </SettingsProvider>
       <Toaster
