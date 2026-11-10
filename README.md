@@ -34,15 +34,7 @@ sudo supervisorctl restart backend
 
 Endpoints:
 - `GET  /api/health` — service health
-- `POST /api/extract-booking` — body `{ "text": "customer message" }`
-
-## Deploying to Vercel
-
-The `frontend/` directory is the Vercel project root. It contains:
-- The React app (built with CRA)
-- `api/extract-booking.js` — Vercel Node.js serverless function for the AI extraction
-- `vercel.json` — Vercel build config
-- `.npmrc` with `legacy-peer-deps=true` — required so npm/yarn accept peer-dep warnings
+- `POST /api/extract-booking` — body `{ "text": "customer message" }
 
 Steps:
 1. Push this repo to GitHub.
